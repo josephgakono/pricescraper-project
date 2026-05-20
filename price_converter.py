@@ -25,7 +25,7 @@ def scrape_books():
     for card in book_cards[:BOOK_LIMIT]:
         title = card.h3.a["title"]
         price_text = card.select_one(".price_color").get_text(strip=True)
-        price = float(price_text.replace("£", ""))
+        price = clean_price(price_text)
 
         books.append({
             "title": title,
@@ -36,6 +36,16 @@ def scrape_books():
         raise ValueError("No books were found on the page.")
 
     return books
+
+
+def clean_price(price_text):
+    number_text = ""
+
+    for character in price_text:
+        if character.isdigit() or character == ".":
+            number_text += character
+
+    return float(number_text)
 
 
 def get_exchange_rate(from_currency, to_currency):
