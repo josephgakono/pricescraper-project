@@ -32,6 +32,9 @@ def scrape_books():
             "price": price,
         })
 
+    if len(books) == 0:
+        raise ValueError("No books were found on the page.")
+
     return books
 
 
@@ -50,6 +53,10 @@ def get_exchange_rate(from_currency, to_currency):
     response.raise_for_status()
 
     data = response.json()
+
+    if "rates" not in data or to_currency not in data["rates"]:
+        raise ValueError("That currency could not be converted by the rate API.")
+
     return float(data["rates"][to_currency])
 
 
@@ -161,13 +168,21 @@ def main():
     to_currency = ask_for_currency("Target", "USD")
     save_type = ask_for_save_type()
 
-    books = scrape_books()
-    rate = get_exchange_rate(from_currency, to_currency)
-    converted_books = convert_books(books, rate)
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        books = scrape_books()
+        rate = get_exchange_rate(from_currency, to_currency)
+        converted_books = convert_books(books, rate)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    print_table(converted_books, from_currency, to_currency, timestamp)
-    save_results(converted_books, from_currency, to_currency, timestamp, save_type)
+        print_table(converted_books, from_currency, to_currency, timestamp)
+        save_results(converted_books, from_currency, to_currency, timestamp, save_type)
+    except requests.exceptions.RequestException:
+        print()
+        print("Could not connect to the book site or exchange-rate API.")
+        print("Check your internet connection and try again.")
+    except ValueError as error:
+        print()
+        print(f"Problem: {error}")
 
 
 if __name__ == "__main__":

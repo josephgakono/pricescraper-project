@@ -15,6 +15,7 @@ The program asks for:
 - whether to save a CSV or JSON file
 
 Books to Scrape lists prices in GBP, so `GBP` is the usual source currency.
+The exchange rates come from the free Frankfurter API.
 
 ## Files
 
