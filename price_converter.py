@@ -9,9 +9,9 @@ from bs4 import BeautifulSoup
 
 
 BOOKS_URL = "https://books.toscrape.com/"
-RATES_URL = "https://api.frankfurter.app/latest"
+RATES_URL = "https://open.er-api.com/v6/latest/"
 BOOK_LIMIT = 10
-COMMON_CURRENCIES = "EUR, USD, GBP, CAD, AUD, JPY, CHF, NOK, SEK"
+COMMON_CURRENCIES = "KES, EUR, USD, GBP, CAD, AUD, JPY, CHF, NOK, SEK"
 
 
 def scrape_books():
@@ -55,14 +55,13 @@ def get_exchange_rate(from_currency, to_currency):
     if from_currency == to_currency:
         return 1.0
 
-    params = {
-        "from": from_currency,
-        "to": to_currency,
-    }
-    response = requests.get(RATES_URL, params=params, timeout=10)
+    response = requests.get(RATES_URL + from_currency, timeout=10)
     response.raise_for_status()
 
     data = response.json()
+
+    if data.get("result") != "success":
+        raise ValueError("The exchange-rate API did not return a rate.")
 
     if "rates" not in data or to_currency not in data["rates"]:
         raise ValueError("That currency could not be converted by the rate API.")
